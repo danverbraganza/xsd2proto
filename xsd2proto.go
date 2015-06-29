@@ -5,15 +5,18 @@ import (
 	"os"
 
 	"github.com/danverbraganza/xsd2proto/converter"
+	"github.com/danverbraganza/xsd2proto/writers"
 )
 
 
 func main() {
-	s := "XMLSchema.xsd"
-	f, _ := os.Open("samples/" + s)
+	f, _ := os.Open("samples/LibraryBooks.xsd")
 
-	a, err := converter.ReadXsd(f)
-	a.Name = s
+	a, err := converter.ReadXsd(f, "LibraryBooks")
 
-	fmt.Printf("%+v, %v", a, err)
+	fmt.Printf("%+v, %v\n", a, err)
+
+	writers.DumpToProto("temp", a)
+
+
 }

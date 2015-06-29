@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="Person">
+    <xs:sequence>
+      <xs:element name="BorrowerId" type="xs:string" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+    <xs:attribute name="firstName" type="xs:string" />
+    <xs:attribute name="lastName" type="xs:string" />
+  </xs:complexType>
+
+  <xs:element name="Book">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Title" type="xs:string" />
+        <xs:element name="Author" type="Person" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="LoanRecord">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Book" />
+        <xs:element name="Patron" type="Person" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

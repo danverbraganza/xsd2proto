@@ -9,8 +9,10 @@ import (
 
 
 
-func ReadXsd(reader io.Reader) (s Schema, e error) {
+func ReadXsd(reader io.Reader, name string) (s Schema, e error) {
 	d := xml.NewDecoder(reader)
-	e = d.Decode(&s)
+ 	e = d.Decode(&s)
+	s.Name = name
+	s.BuildRefs()
 	return
 }

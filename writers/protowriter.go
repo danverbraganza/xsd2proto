@@ -10,7 +10,7 @@ import (
 
 	"github.com/danverbraganza/varcaser/varcaser"
 
-	"github.com/danverbraganza/xsd2proto/converter"
+	"github.com/danverbraganza/xsd2proto/model"
 )
 
 type Type struct {
@@ -22,13 +22,13 @@ type Type struct {
 type Field struct {
 	Name       string
 	TypeRef    string               // If complex type: contains the type reference.
-	SimpleKind converter.SimpleKind // If simple type: contains the number.
+	SimpleKind model.SimpleKind // If simple type: contains the number.
 	Repeated   bool
 	Required   bool
 }
 
 type ProtoBuilder struct {
-	Schema      converter.Schema
+	Schema      model.Schema
 	TypesByName map[string]*Type
 	AllTypes    []*Type
 }
@@ -40,7 +40,7 @@ var caseConverter = varcaser.Caser{
 
 // AllTypes inspects a Schema and returns a slice of all the types that need to
 // be constructed in it.
-func FromSchema(s converter.Schema) (p ProtoBuilder) {
+func FromSchema(s model.Schema) (p ProtoBuilder) {
 
 	p.Schema = s
 
@@ -59,7 +59,7 @@ func FromSchema(s converter.Schema) (p ProtoBuilder) {
 // LoadElement is called to load an element. It turns an Element into a Type of
 // ProtoBuilder. It also returns a Field, because Elements are
 // eponymous fields of their superiors.
-func (p *ProtoBuilder) LoadElement(e converter.Element) Field {
+func (p *ProtoBuilder) LoadElement(e model.Element) Field {
 	e = e.DeRef(p.Schema)
 	fmt.Println(e.String())
 
@@ -68,7 +68,7 @@ func (p *ProtoBuilder) LoadElement(e converter.Element) Field {
 		t := p.Schema.TypeRefs[*e.Type]
 		fmt.Println(t)
 		switch c := t.(type) {
-		case converter.ComplexType:
+		case model.ComplexType:
 			if c.Name == nil {
 				c.Name = e.Name
 			}
@@ -77,7 +77,7 @@ func (p *ProtoBuilder) LoadElement(e converter.Element) Field {
 				Name:    *e.Name,
 				TypeRef: *c.Name,
 			}
-		case converter.SimpleType:
+		case model.SimpleType:
 			return Field{
 				Name:       *e.Name,
 				SimpleKind: c.Kind(p.Schema),
@@ -85,7 +85,7 @@ func (p *ProtoBuilder) LoadElement(e converter.Element) Field {
 		default: // Didn't find it, it's probably an xs: type
 			return Field{
 				Name:       *e.Name,
-				SimpleKind: converter.XmlTypes[*e.Type],
+				SimpleKind: model.XmlTypes[*e.Type],
 			}
 		}
 	}
@@ -93,7 +93,7 @@ func (p *ProtoBuilder) LoadElement(e converter.Element) Field {
 	if child := e.Child(); child != nil {
 		child = child.DeRef(p.Schema)
 		switch c := child.(type) {
-		case converter.ComplexType:
+		case model.ComplexType:
 			if c.Name == nil {
 				c.Name = e.Name
 			}
@@ -104,7 +104,7 @@ func (p *ProtoBuilder) LoadElement(e converter.Element) Field {
 				Repeated: false,
 				Required: false,
 			}
-		case converter.SimpleType:
+		case model.SimpleType:
 			return Field{
 				Name:       child.GetName(),
 				SimpleKind: c.Kind(p.Schema),
@@ -116,11 +116,11 @@ func (p *ProtoBuilder) LoadElement(e converter.Element) Field {
 	}
 
 	log.Fatalf(e.String())
-	return Field{Name: *e.Name, SimpleKind: converter.TYPE_STRING}
+	return Field{Name: *e.Name, SimpleKind: model.TYPE_STRING}
 }
 
 // We are parsing a complex type, and we turn it into an entry in our map.
-func (p *ProtoBuilder) LoadComplexType(c converter.ComplexType) {
+func (p *ProtoBuilder) LoadComplexType(c model.ComplexType) {
 	if c.Name == nil {
 		return
 	}
@@ -139,7 +139,7 @@ func (p *ProtoBuilder) LoadComplexType(c converter.ComplexType) {
 		a = a.DeRef(p.Schema)
 		fmt.Println(a)
 		if a.Type == nil {
-			t.AddField(Field{Name: *a.Name, SimpleKind: converter.TYPE_STRING})
+			t.AddField(Field{Name: *a.Name, SimpleKind: model.TYPE_STRING})
 		} else {
 			t.AddField(Field{Name: *a.Name, SimpleKind: a.Kind()})
 		}
@@ -167,7 +167,7 @@ func (t *Type) AddImport(name string) {
 	t.Imports = append(t.Imports, name)
 }
 
-func (t Type) ToProtoFile(dirname string, s converter.Schema) error {
+func (t Type) ToProtoFile(dirname string, s model.Schema) error {
 	f, err := os.Create(path.Join(dirname, t.FileName()))
 	if err != nil {
 		return err
@@ -205,25 +205,25 @@ func (t Type) ToProtoFile(dirname string, s converter.Schema) error {
 	return nil
 }
 
-var ToProtoTypes = map[converter.SimpleKind]string{
-	converter.TYPE_INVALID:           "",
-	converter.TYPE_STRING:            "string",
-	converter.TYPE_BOOLEAN:           "bool",
-	converter.TYPE_FLOAT:             "float",
-	converter.TYPE_DOUBLE:            "double",
-	converter.TYPE_DECIMAL:           "fixed64",
-	converter.TYPE_ANY_URI:           "string",
-	converter.TYPE_Q_NAME:            "string",
-	converter.TYPE_NORMALIZED_STRING: "string",
-	converter.TYPE_TOKEN:             "string",
-	converter.TYPE_INTEGER:           "int64",
-	converter.TYPE_INT:               "int64",
-	converter.TYPE_SHORT:             "int32",
-	converter.TYPE_BYTE:              "int32",
-	converter.TYPE_U_INTEGER:         "uint64",
-	converter.TYPE_U_INT:             "uint64",
-	converter.TYPE_U_SHORT:           "uint32",
-	converter.TYPE_U_BYTE:            "uint32",
+var ToProtoTypes = map[model.SimpleKind]string{
+	model.TYPE_INVALID:           "",
+	model.TYPE_STRING:            "string",
+	model.TYPE_BOOLEAN:           "bool",
+	model.TYPE_FLOAT:             "float",
+	model.TYPE_DOUBLE:            "double",
+	model.TYPE_DECIMAL:           "fixed64",
+	model.TYPE_ANY_URI:           "string",
+	model.TYPE_Q_NAME:            "string",
+	model.TYPE_NORMALIZED_STRING: "string",
+	model.TYPE_TOKEN:             "string",
+	model.TYPE_INTEGER:           "int64",
+	model.TYPE_INT:               "int64",
+	model.TYPE_SHORT:             "int32",
+	model.TYPE_BYTE:              "int32",
+	model.TYPE_U_INTEGER:         "uint64",
+	model.TYPE_U_INT:             "uint64",
+	model.TYPE_U_SHORT:           "uint32",
+	model.TYPE_U_BYTE:            "uint32",
 }
 
 func (f Field) String() string {
@@ -235,7 +235,7 @@ func (f Field) String() string {
 	} else {
 		b.WriteString("optional ")
 	}
-	if f.SimpleKind != converter.TYPE_INVALID {
+	if f.SimpleKind != model.TYPE_INVALID {
 		b.WriteString(ToProtoTypes[f.SimpleKind])
 	} else {
 		b.WriteString(f.TypeRef)
@@ -251,7 +251,7 @@ func (t Type) FileName() string {
 
 }
 
-func DumpToProto(dirname string, s converter.Schema) error {
+func DumpToProto(dirname string, s model.Schema) error {
 	fmt.Println("Preparing to dump to protobuf in folder", dirname)
 
 	if err := os.MkdirAll(dirname, os.ModeDir|os.ModePerm); err != nil {

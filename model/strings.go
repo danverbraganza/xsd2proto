@@ -1,4 +1,4 @@
-package converter
+package model
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 
 func WriteAttrIf(b *bytes.Buffer, fieldName string, fieldValue *string) {
 	if fieldValue != nil {
-		b.WriteString(fieldName +  `="` + *fieldValue + `" `)
+		b.WriteString(fieldName + `="` + *fieldValue + `" `)
 	}
 }
 
@@ -17,24 +17,21 @@ func (s Schema) String() string {
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 `)
 
-	for _, c := range(s.ComplexTypes) {
+	for _, c := range s.ComplexTypes {
 		b.WriteString(c.String())
 	}
 
-
-	for _, s := range(s.SimpleTypes) {
+	for _, s := range s.SimpleTypes {
 		b.WriteString(s.String())
 	}
 
-
-	for _, e := range(s.Elements) {
+	for _, e := range s.Elements {
 		b.WriteString(e.String())
 	}
 
 	b.WriteString("</xs:schema>\n")
 	return b.String()
 }
-
 
 func (e Element) String() string {
 	b := &bytes.Buffer{}
@@ -44,7 +41,7 @@ func (e Element) String() string {
 	WriteAttrIf(b, "ref", e.Ref)
 
 	c := e.Child()
-	if  c == nil {
+	if c == nil {
 		b.WriteString("/>\n")
 		return b.String()
 	}
@@ -69,7 +66,7 @@ func (c ComplexType) String() string {
 
 	b.WriteString(c.Sequence.String())
 
-	for _, a := range(c.Attributes) {
+	for _, a := range c.Attributes {
 		b.WriteString(a.String())
 	}
 
@@ -77,20 +74,18 @@ func (c ComplexType) String() string {
 	return b.String()
 }
 
-
 func (s *Sequence) String() string {
 	if s == nil {
 		return ""
 	}
 	b := &bytes.Buffer{}
 	b.WriteString("<xs:sequence>\n")
-	for _, e := range(s.Elements) {
+	for _, e := range s.Elements {
 		b.WriteString(e.String())
 	}
 	b.WriteString("</xs:sequence>\n")
 	return b.String()
 }
-
 
 func (c SimpleType) String() string {
 	b := &bytes.Buffer{}

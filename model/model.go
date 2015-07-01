@@ -1,4 +1,4 @@
-package converter
+package model
 
 // This file contains structs that model the XML Schema in Go.
 // The model below was created by looking over http://www.w3.org/2001/XMLSchema.xsd
@@ -6,7 +6,6 @@ package converter
 import (
 	"encoding/xml"
 	"fmt"
-//	"log"
 )
 
 type Schema struct {
@@ -25,7 +24,7 @@ type Schema struct {
 }
 
 // Must be a pointer to either a simple or a complex type, or nil.
-type Type interface{
+type Type interface {
 	GetName() string
 	DeRef(s Schema) Type
 }
@@ -140,7 +139,7 @@ type Restriction struct {
 type SimpleType struct {
 	Name        *string      `xml:"name,attr"`
 	Ref         *string      `xml:"ref,attr"`
-	Restriction       Restriction        `xml:"restriction"`
+	Restriction Restriction  `xml:"restriction"`
 	Annotations []Annotation `xml:"annotation"`
 	Sequences   []Sequence   `xml:"sequence"`
 	Attributes  []Attribute  `xml:"attribute"`
@@ -195,7 +194,6 @@ func (e Element) DeRef(s Schema) Element {
 	return e
 }
 
-
 func (r Restriction) DeRef(s Schema) Type {
 	if r.Ref == nil {
 		return r
@@ -207,49 +205,48 @@ func (r Restriction) GetName() string {
 	return *r.Ref
 }
 
-
-var XmlTypes = map[string]SimpleKind {
-	"xs:string": TYPE_STRING,
-	"xs:boolean": TYPE_INT,
-	"xs:float": TYPE_FLOAT,
-	"xs:double": TYPE_DOUBLE,
-	"xs:decimal": TYPE_DECIMAL,
-	"xs:duration": TYPE_DURATION,
-	"xs:dateTime": TYPE_DATETIME,
-	"xs:time": TYPE_TIME,
-	"xs:date": TYPE_DATE,
-	"xs:gYearMonth": TYPE_G_YEAR_MONTH,
-	"xs:gYear": TYPE_G_YEAR,
-	"xs:gMonthDay": TYPE_G_MONTH_DAY,
-	"xs:gDay": TYPE_G_DAY,
-	"xs:gMonth": TYPE_G_MONTH,
-	"xs:hexBinary": TYPE_HEX_BINARY,
-	"xs:base64Binary": TYPE_BASE_64_BINARY,
-	"xs:anyURI": TYPE_ANY_URI,
-	"xs:QName": TYPE_Q_NAME,
-	"xs:normalizedString": TYPE_STRING,
-	"xs:token": TYPE_TOKEN,
-	"xs:language": TYPE_STRING,
-	"xs:IDREFS": TYPE_STRING,
-	"xs:ENTITIES": TYPE_STRING,
-	"xs:NMTOKEN": TYPE_STRING,
-	"xs:NCName": TYPE_STRING,
-	"xs:ID": TYPE_STRING,
-	"xs:IDREF": TYPE_STRING,
-	"xs:ENTITY": TYPE_STRING,
-	"xs:integer": TYPE_INTEGER,
+var XmlTypes = map[string]SimpleKind{
+	"xs:string":             TYPE_STRING,
+	"xs:boolean":            TYPE_INT,
+	"xs:float":              TYPE_FLOAT,
+	"xs:double":             TYPE_DOUBLE,
+	"xs:decimal":            TYPE_DECIMAL,
+	"xs:duration":           TYPE_DURATION,
+	"xs:dateTime":           TYPE_DATETIME,
+	"xs:time":               TYPE_TIME,
+	"xs:date":               TYPE_DATE,
+	"xs:gYearMonth":         TYPE_G_YEAR_MONTH,
+	"xs:gYear":              TYPE_G_YEAR,
+	"xs:gMonthDay":          TYPE_G_MONTH_DAY,
+	"xs:gDay":               TYPE_G_DAY,
+	"xs:gMonth":             TYPE_G_MONTH,
+	"xs:hexBinary":          TYPE_HEX_BINARY,
+	"xs:base64Binary":       TYPE_BASE_64_BINARY,
+	"xs:anyURI":             TYPE_ANY_URI,
+	"xs:QName":              TYPE_Q_NAME,
+	"xs:normalizedString":   TYPE_STRING,
+	"xs:token":              TYPE_TOKEN,
+	"xs:language":           TYPE_STRING,
+	"xs:IDREFS":             TYPE_STRING,
+	"xs:ENTITIES":           TYPE_STRING,
+	"xs:NMTOKEN":            TYPE_STRING,
+	"xs:NCName":             TYPE_STRING,
+	"xs:ID":                 TYPE_STRING,
+	"xs:IDREF":              TYPE_STRING,
+	"xs:ENTITY":             TYPE_STRING,
+	"xs:integer":            TYPE_INTEGER,
 	"xs:nonPositiveInteger": TYPE_INTEGER,
-	"xs:negativeInteger": TYPE_INTEGER,
-	"xs:long": TYPE_INTEGER,
-	"xs:int": TYPE_INT,
-	"xs:short": TYPE_SHORT,
-	"xs:byte": TYPE_BYTE,
+	"xs:negativeInteger":    TYPE_INTEGER,
+	"xs:long":               TYPE_INTEGER,
+	"xs:int":                TYPE_INT,
+	"xs:short":              TYPE_SHORT,
+	"xs:byte":               TYPE_BYTE,
 	"xs:nonNegativeInteger": TYPE_U_INTEGER,
-	"xs:unsignedLong": TYPE_U_INTEGER,
-	"xs:unsignedInt": TYPE_U_INTEGER,
-	"xs:unsignedShort": TYPE_U_INTEGER,
-	"xs:unsignedByte": TYPE_U_INTEGER,
-	"xs:positiveInteger": TYPE_U_INTEGER,
+	"xs:unsignedLong":       TYPE_U_INTEGER,
+	"xs:unsignedInt":        TYPE_U_INTEGER,
+	"xs:unsignedShort":      TYPE_U_INTEGER,
+	"xs:unsignedByte":       TYPE_U_INTEGER,
+	"xs:positiveInteger":    TYPE_U_INTEGER,
 }
 
 func (a Attribute) Kind() SimpleKind {
@@ -266,8 +263,6 @@ func (t SimpleType) Kind(s Schema) SimpleKind {
 	return t.Restriction.DeRef(s).(SimpleType).Kind(s)
 }
 
-
-
 func (t SimpleType) DeRef(s Schema) Type {
 	if t.Ref == nil {
 		return t
@@ -278,7 +273,6 @@ func (t SimpleType) DeRef(s Schema) Type {
 func (t SimpleType) GetName() string {
 	return *t.Name
 }
-
 
 func (t ComplexType) DeRef(s Schema) Type {
 	if t.Ref == nil {
@@ -294,7 +288,6 @@ func (t ComplexType) GetName() string {
 	return ""
 
 }
-
 
 func (e Element) Child() Type {
 	switch {

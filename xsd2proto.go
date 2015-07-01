@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/danverbraganza/xsd2proto/converter"
+	"github.com/danverbraganza/xsd2proto/reader"
 	"github.com/danverbraganza/xsd2proto/writers"
 )
 
@@ -12,11 +12,9 @@ import (
 func main() {
 	f, _ := os.Open("samples/LibraryBooks.xsd")
 
-	a, err := converter.ReadXsd(f, "LibraryBooks")
+	a, err := reader.ReadXsd(f, "LibraryBooks")
 
 	fmt.Printf("%+v, %v\n", a, err)
 
 	writers.DumpToProto("temp", a)
-
-
 }
